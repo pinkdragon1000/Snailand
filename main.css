@@ -16,10 +16,28 @@ body {
     color: var(--grey);
 }
 
+h1,
+h2 {
+    margin: 0rem;
+    font-weight: normal;
+}
+
+h1 {
+    font-size: 9rem;
+}
+
+h2 {
+    font-size: 2.25rem;
+}
+
 p,
 span,
 h2 {
     padding-left: 2rem;
+}
+
+.header-text-shadow {
+    text-shadow: 0rem 0.25rem 0.25rem var(--shadow);
 }
 
 button {
@@ -29,6 +47,7 @@ button {
     box-shadow: inset 0rem 0rem 0.625rem var(--shadow);
     border-radius: 1.25rem;
     text-align: center;
+    color: var(--grey);
 }
 
 button:hover {
@@ -42,16 +61,6 @@ button:hover {
     float: right;
 }
 
-h2 {
-    font-size: 2.25rem;
-    margin: 0rem;
-    font-weight: normal;
-}
-
-.h2-text-shadow {
-    text-shadow: 0rem 0.25rem 0.25rem var(--shadow);
-}
-
 
 /*index.html*/
 
@@ -59,10 +68,6 @@ h2 {
     position: absolute;
     top: 8.3125rem;
     left: 2.5625rem;
-    text-shadow: 0rem 0.25rem 0.25rem var(--shadow);
-    font-size: 9rem;
-    opacity: 1;
-    text-align: left;
 }
 
 .index-margin {
@@ -88,34 +93,27 @@ h2 {
 .character-btn {
     width: 19.125rem;
     height: 17.125rem;
-    border-radius: 3.1875rem;
     margin: 0rem 2rem 2rem 2rem;
+    background-repeat: no-repeat;
+    background-position: center;
 }
 
 .pink {
     background-color: var(--light-pink);
     background-image: url(./assets/Nelly.png);
-    background-repeat: no-repeat;
-    background-position: center;
 }
 
 .purple {
     background-color: var(--light-purple);
     background-image: url(./assets/Sally.png);
-    background-repeat: no-repeat;
-    background-position: center;
 }
 
 .green {
     background-color: var(--light-green);
     background-image: url(./assets/Billy.png);
-    background-repeat: no-repeat;
-    background-position: center;
 }
 
 .blue {
     background-color: var(--light-blue);
     background-image: url(./assets/Tommy.png);
-    background-repeat: no-repeat;
-    background-position: center;
 }
