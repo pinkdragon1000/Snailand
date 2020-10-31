@@ -58,7 +58,9 @@ button:hover {
     width: 11.5rem;
     height: 4.125rem;
     font-size: 2rem;
-    float: right;
+    right: 20;
+    bottom: 20;
+    position: fixed;
 }
 
 
@@ -85,6 +87,15 @@ button:hover {
     width: 21.5625rem;
     height: 7.75rem;
     font-size: 3rem;
+}
+
+
+/*instructions.html*/
+
+.instruction-image {
+    width: 90%;
+    height: 25rem;
+    align-content: center;
 }
 
 
