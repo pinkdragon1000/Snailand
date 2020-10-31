@@ -7,8 +7,16 @@
     <script src="../main.js"></script>
 </head>
 
-<body onkeydown="" onkeyup="moveSelection(event)">
-    <img id="character" style="position: absolute; left: 15; right: 15; bottom: 1;" src="../assets/Nelly.png" />
+<body class="game-background" onkeydown="moveSelection(event)">
+
+    <div class="lives">
+        <img src="../assets/Heart.svg" />
+        <img src="../assets/Heart.svg" />
+        <img src="../assets/Heart.svg" />
+    </div>
+    <div class="grass"> </div>
+    <img id="character" style="position: absolute; left: 15; right: 15; bottom: 140;" src="../assets/Nelly.png" />
+
 </body>
 
 </html>
