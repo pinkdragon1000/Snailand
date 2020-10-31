@@ -1,0 +1,121 @@
+/*Shared Styles*/
+
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans&display=swap');
+:root {
+    --light-pink: rgba(221, 166, 225, 0.26);
+    --light-purple: rgba(185, 166, 225, 0.26);
+    --light-green: rgba(166, 225, 172, 0.259);
+    --light-blue: rgba(166, 225, 208, 0.259);
+    --light-grey: rgba(196, 196, 196, 1);
+    --grey: rgba(103, 90, 90, 1);
+    --shadow: rgba(0, 0, 0, 0.25);
+}
+
+body {
+    font-family: Nunito Sans;
+    color: var(--grey);
+}
+
+p,
+span,
+h2 {
+    padding-left: 2rem;
+}
+
+button {
+    border: none;
+    cursor: pointer;
+    background: var(--light-grey);
+    box-shadow: inset 0rem 0rem 0.625rem var(--shadow);
+    border-radius: 1.25rem;
+    text-align: center;
+}
+
+button:hover {
+    box-shadow: inset 0rem 0rem 1.25rem var(--shadow);
+}
+
+.small-btn {
+    width: 11.5rem;
+    height: 4.125rem;
+    font-size: 2rem;
+    float: right;
+}
+
+h2 {
+    font-size: 2.25rem;
+    margin: 0rem;
+    font-weight: normal;
+}
+
+.h2-text-shadow {
+    text-shadow: 0rem 0.25rem 0.25rem var(--shadow);
+}
+
+
+/*index.html*/
+
+.index-title {
+    position: absolute;
+    top: 8.3125rem;
+    left: 2.5625rem;
+    text-shadow: 0rem 0.25rem 0.25rem var(--shadow);
+    font-size: 9rem;
+    opacity: 1;
+    text-align: left;
+}
+
+.index-margin {
+    margin-top: 20.625rem;
+    margin-left: 3.375rem;
+}
+
+.index-img {
+    bottom: -0.15625rem;
+    left: -3.8125rem;
+    position: fixed;
+}
+
+.big-btn {
+    width: 21.5625rem;
+    height: 7.75rem;
+    font-size: 3rem;
+}
+
+
+/*characters.html*/
+
+.character-btn {
+    width: 19.125rem;
+    height: 17.125rem;
+    border-radius: 3.1875rem;
+    margin: 0rem 2rem 2rem 2rem;
+}
+
+.pink {
+    background-color: var(--light-pink);
+    background-image: url(./assets/Nelly.png);
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.purple {
+    background-color: var(--light-purple);
+    background-image: url(./assets/Sally.png);
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.green {
+    background-color: var(--light-green);
+    background-image: url(./assets/Billy.png);
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.blue {
+    background-color: var(--light-blue);
+    background-image: url(./assets/Tommy.png);
+    background-repeat: no-repeat;
+    background-position: center;
+}
