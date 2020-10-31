@@ -31,3 +31,12 @@ function moveSelection(event) {
       break;
   }
 }
+
+function gameLoop() {
+  // change position based on speed
+  moveSelection();
+  setTimeout("gameLoop()", 10);
+  window.onload = function () {
+    gameLoop();
+  };
+}
