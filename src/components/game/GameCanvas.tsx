@@ -8,7 +8,7 @@ import { saveHighScore, loadHighScore } from "../../lib/gameStorage";
 import { useGameAssets } from "../../hooks/useGameAssets";
 import { useGameControls } from "../../hooks/useGameControls";
 import { drawStar } from "../../lib/drawUtils";
-import { playStarSound, playHeartLossSound, playCountdownBeep } from "../../lib/soundUtils";
+import { playStarSound, playHeartLossSound, playCountdownBeep, playGameOverSound, playHighScoreSound } from "../../lib/soundUtils";
 import type { GameState, GameStateRef } from "../../types/gameTypes";
 
 // Assets
@@ -407,6 +407,10 @@ export default function GameCanvas({ character, onBack }: GameCanvasProps) {
     state.isGameOver = true; // Ensure loop stops synchronously
 
     const newHighScore = Math.max(state.score, gameState.highScore);
+    const isNewHighScore = state.score > gameState.highScore;
+    
+    isNewHighScore ? playHighScoreSound() : playGameOverSound();
+    
     saveHighScore(newHighScore);
 
     setGameState(prev => ({

@@ -88,6 +88,79 @@ export function playCountdownBeep() {
   }
 }
 
+// Play game over sound
+export function playGameOverSound() {
+  try {
+    const ctx = getAudioContext();
+    
+    // Three descending notes for "game over" feel
+    const notes = [
+      { freq: 392, time: 0, duration: 0.3 },      // G4
+      { freq: 349.23, time: 0.3, duration: 0.3 }, // F4
+      { freq: 293.66, time: 0.6, duration: 0.5 }, // D4 (longer final note)
+    ];
+    
+    notes.forEach(note => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      
+      osc.frequency.setValueAtTime(note.freq, ctx.currentTime + note.time);
+      osc.type = 'sine';
+      
+      // Envelope
+      gain.gain.setValueAtTime(0, ctx.currentTime + note.time);
+      gain.gain.linearRampToValueAtTime(0.25, ctx.currentTime + note.time + 0.05);
+      gain.gain.linearRampToValueAtTime(0.1, ctx.currentTime + note.time + note.duration - 0.1);
+      gain.gain.linearRampToValueAtTime(0, ctx.currentTime + note.time + note.duration);
+      
+      osc.start(ctx.currentTime + note.time);
+      osc.stop(ctx.currentTime + note.time + note.duration);
+    });
+  } catch (error) {
+    console.warn('Could not play game over sound:', error);
+  }
+}
+
+// Play high score celebration sound
+export function playHighScoreSound() {
+  try {
+    const ctx = getAudioContext();
+    
+    // Ascending triumphant notes for high score!
+    const notes = [
+      { freq: 523.25, time: 0, duration: 0.15 },    // C5
+      { freq: 659.25, time: 0.15, duration: 0.15 }, // E5
+      { freq: 783.99, time: 0.3, duration: 0.15 },  // G5
+      { freq: 1046.5, time: 0.45, duration: 0.4 },  // C6 (victory!)
+    ];
+    
+    notes.forEach(note => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      
+      osc.frequency.setValueAtTime(note.freq, ctx.currentTime + note.time);
+      osc.type = 'triangle';
+      
+      // Envelope
+      gain.gain.setValueAtTime(0, ctx.currentTime + note.time);
+      gain.gain.linearRampToValueAtTime(0.3, ctx.currentTime + note.time + 0.03);
+      gain.gain.linearRampToValueAtTime(0.15, ctx.currentTime + note.time + note.duration - 0.05);
+      gain.gain.linearRampToValueAtTime(0, ctx.currentTime + note.time + note.duration);
+      
+      osc.start(ctx.currentTime + note.time);
+      osc.stop(ctx.currentTime + note.time + note.duration);
+    });
+  } catch (error) {
+    console.warn('Could not play high score sound:', error);
+  }
+}
+
 // Background music state
 let menuMusicInterval: number | null = null;
 let menuMusicGainNode: GainNode | null = null;
