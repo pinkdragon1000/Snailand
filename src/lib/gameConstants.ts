@@ -17,11 +17,11 @@ export const GAME_CONSTANTS = {
   CANVAS_HEIGHT: 500,
   
   // Spawning
-  OBSTACLE_SPAWN_CHANCE: 0.7,
-  OBSTACLE_SPAWN_VARIANCE: 30, // +/- frames
-  STAR_SPAWN_INTERVAL: 150,
-  STAR_SPAWN_HEIGHT_MIN: 50,
-  STAR_SPAWN_HEIGHT_RANGE: 100,
+  OBSTACLE_SPAWN_CHANCE: 0.9,
+  OBSTACLE_SPAWN_VARIANCE: 10, // +/- frames (reduced variance for more consistent spawning)
+  STAR_SPAWN_INTERVAL: 300, // Increased for less frequent stars
+  STAR_SPAWN_HEIGHT_MIN: 30,  // Lower minimum (was 50)
+  STAR_SPAWN_HEIGHT_RANGE: 180, // Wider range for more variety (was 100)
   STAR_MIN_DISTANCE_FROM_OBSTACLES: 80, // Pixels
   
   // Progression

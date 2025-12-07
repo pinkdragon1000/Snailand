@@ -8,6 +8,7 @@ import { saveHighScore, loadHighScore } from "../../lib/gameStorage";
 import { useGameAssets } from "../../hooks/useGameAssets";
 import { useGameControls } from "../../hooks/useGameControls";
 import { drawStar } from "../../lib/drawUtils";
+import { playStarSound, playHeartLossSound, playCountdownBeep } from "../../lib/soundUtils";
 import type { GameState, GameStateRef } from "../../types/gameTypes";
 
 // Assets
@@ -37,6 +38,7 @@ export default function GameCanvas({ character, onBack }: GameCanvasProps) {
     isPaused: false,
     hearts: 3,
   });
+  const [countdown, setCountdown] = useState<number | null>(null);
 
   // Map character prop to sprite image
   const getCharacterSprite = (char: string) => {
@@ -154,9 +156,24 @@ export default function GameCanvas({ character, onBack }: GameCanvasProps) {
     if (gameState.isGameOver) return;
 
     if (stateRef.current.isPaused) {
-      stateRef.current.isPaused = false;
-      setGameState(prev => ({ ...prev, isPaused: false }));
-      requestRef.current = requestAnimationFrame(gameLoop);
+      // Start countdown from 3 when resuming
+      setCountdown(3);
+      playCountdownBeep(); // Play beep for 3
+      let count = 3;
+      
+      const countdownInterval = setInterval(() => {
+        count--;
+        if (count > 0) {
+          setCountdown(count);
+          playCountdownBeep();
+        } else {
+          setCountdown(null);
+          stateRef.current.isPaused = false;
+          setGameState(prev => ({ ...prev, isPaused: false }));
+          requestRef.current = requestAnimationFrame(gameLoop);
+          clearInterval(countdownInterval);
+        }
+      }, 1000);
     } else {
       stateRef.current.isPaused = true;
       setGameState(prev => ({ ...prev, isPaused: true }));
@@ -191,7 +208,15 @@ export default function GameCanvas({ character, onBack }: GameCanvasProps) {
 
     // Update Background
     state.bgX -= effectiveSpeed * 0.5; // Parallax effect
-    if (state.bgX <= -canvas.width) state.bgX = 0;
+    
+    // Calculate background width for proper looping
+    const bgAspectRatio = assetsRef.current.bg.naturalWidth / assetsRef.current.bg.naturalHeight;
+    const canvasAspectRatio = canvas.width / canvas.height;
+    const bgWidth = bgAspectRatio > canvasAspectRatio 
+      ? canvas.height * bgAspectRatio 
+      : canvas.width;
+    
+    if (state.bgX <= -bgWidth) state.bgX = 0;
 
     // Update Invincibility
     if (state.invincibilityTimer > 0) {
@@ -228,20 +253,30 @@ export default function GameCanvas({ character, onBack }: GameCanvasProps) {
     if (state.frame % spawnInterval === 0) {
       if (Math.random() < GAME_CONSTANTS.OBSTACLE_SPAWN_CHANCE) {
         const obstacleType = Math.floor(Math.random() * 3); // 0, 1, 2
-        const stackHeight = Math.floor(Math.random() * 3) + 1; // 1, 2, or 3 obstacles stacked
-        const stackId = state.nextStackId++;
+        const spawnX = canvas.width;
         
-        // Create stacked obstacles - they all share the same stackId and X position
-        for (let stack = 0; stack < stackHeight; stack++) {
-          state.obstacles.push({
-            x: canvas.width,
-            y: groundY + 10 - (stack * GAME_CONSTANTS.OBSTACLE_SIZE.height),
-            width: GAME_CONSTANTS.OBSTACLE_SIZE.width,
-            height: GAME_CONSTANTS.OBSTACLE_SIZE.height,
-            passed: false,
-            type: obstacleType,
-            stackId: stackId
-          });
+        // Check if there's already an obstacle too close to this spawn position
+        const minSpacingX = 100; // Minimum horizontal spacing between obstacle groups (reduced from 150)
+        const hasNearbyObstacle = state.obstacles.some(obs => 
+          Math.abs(obs.x - spawnX) < minSpacingX
+        );
+        
+        if (!hasNearbyObstacle) {
+          const stackHeight = Math.floor(Math.random() * 3) + 1; // 1, 2, or 3 obstacles stacked
+          const stackId = state.nextStackId++;
+          
+          // Create stacked obstacles - they all share the same stackId and X position
+          for (let stack = 0; stack < stackHeight; stack++) {
+            state.obstacles.push({
+              x: spawnX,
+              y: groundY + 10 - (stack * GAME_CONSTANTS.OBSTACLE_SIZE.height),
+              width: GAME_CONSTANTS.OBSTACLE_SIZE.width,
+              height: GAME_CONSTANTS.OBSTACLE_SIZE.height,
+              passed: false,
+              type: obstacleType,
+              stackId: stackId
+            });
+          }
         }
       }
     }
@@ -254,17 +289,28 @@ export default function GameCanvas({ character, onBack }: GameCanvasProps) {
       const starHeight = GAME_CONSTANTS.STAR_SIZE.height;
       
       // Check if star would overlap with any obstacles
+      const minHorizontalDistance = 60; // Reduced from 130
+      const minVerticalDistance = 40; // Reduced vertical buffer
+      
       const isSafeSpot = !state.obstacles.some(obs => {
-        const minDistance = GAME_CONSTANTS.STAR_MIN_DISTANCE_FROM_OBSTACLES;
-        const horizontalOverlap = Math.abs(starX - obs.x) < minDistance;
+        const horizontalDistance = Math.abs(starX - obs.x);
+        if (horizontalDistance > minHorizontalDistance) return false; // Far enough away
+        
+        // Check vertical overlap with buffer
         const verticalOverlap = 
-          starY < obs.y + obs.height + minDistance &&
-          starY + starHeight > obs.y - minDistance;
-        return horizontalOverlap && verticalOverlap;
+          starY < obs.y + obs.height + minVerticalDistance &&
+          starY + starHeight > obs.y - minVerticalDistance;
+        
+        return horizontalDistance < minHorizontalDistance && verticalOverlap;
       });
       
+      // Check stars aren't too close to other stars
+      const notNearOtherStars = !state.stars.some(star => 
+        Math.abs(starX - star.x) < 80 && Math.abs(starY - star.y) < 60
+      );
+      
       // Only spawn if position is safe
-      if (isSafeSpot) {
+      if (isSafeSpot && notNearOtherStars) {
         state.stars.push({
           x: starX,
           y: starY,
@@ -293,6 +339,7 @@ export default function GameCanvas({ character, onBack }: GameCanvasProps) {
         // Hit!
         state.hearts -= GAME_CONSTANTS.HEART_DAMAGE;
         state.invincibilityTimer = GAME_CONSTANTS.INVINCIBILITY_FRAMES;
+        playHeartLossSound(); // Play sound effect
 
         if (state.hearts <= 0) {
           gameOver();
@@ -327,6 +374,7 @@ export default function GameCanvas({ character, onBack }: GameCanvasProps) {
         state.stars.splice(i, 1);
         state.starCount += 1; // Correctly update counter
         state.score += GAME_CONSTANTS.STAR_SCORE_BONUS; // Bonus score for stars
+        playStarSound(); // Play sound effect
       }
 
       // Remove off-screen
@@ -382,8 +430,31 @@ export default function GameCanvas({ character, onBack }: GameCanvasProps) {
 
     // Draw Background
     if (assets.bg.complete) {
-      ctx.drawImage(assets.bg, state.bgX, 0, canvas.width, canvas.height);
-      ctx.drawImage(assets.bg, state.bgX + canvas.width, 0, canvas.width, canvas.height);
+      // Calculate proper background dimensions to maintain aspect ratio
+      const bgAspectRatio = assets.bg.naturalWidth / assets.bg.naturalHeight;
+      const canvasAspectRatio = canvas.width / canvas.height;
+      
+      let bgWidth, bgHeight, bgY;
+      
+      // Cover the entire canvas while maintaining aspect ratio
+      if (bgAspectRatio > canvasAspectRatio) {
+        // Background is wider - fit to height
+        bgHeight = canvas.height;
+        bgWidth = Math.ceil(bgHeight * bgAspectRatio);
+        bgY = 0;
+      } else {
+        // Background is taller - fit to width
+        bgWidth = canvas.width;
+        bgHeight = Math.ceil(bgWidth / bgAspectRatio);
+        bgY = Math.floor((canvas.height - bgHeight) / 2); // Center vertically
+      }
+      
+      // Round X position to prevent sub-pixel rendering gaps
+      const bgX = Math.floor(state.bgX);
+      
+      // Draw two copies for seamless scrolling with 1px overlap to prevent seams
+      ctx.drawImage(assets.bg, bgX, bgY, bgWidth + 1, bgHeight);
+      ctx.drawImage(assets.bg, bgX + bgWidth, bgY, bgWidth + 1, bgHeight);
     } else {
       ctx.fillStyle = "#fce4ec"; // Fallback pink
       ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -467,6 +538,14 @@ export default function GameCanvas({ character, onBack }: GameCanvasProps) {
         onClick={jump}
         data-testid="game-canvas"
       />
+
+      {countdown !== null && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/30 z-50 pointer-events-none">
+          <div className="text-white font-bold text-9xl animate-pulse drop-shadow-2xl" style={{ fontFamily: 'Fredoka, sans-serif' }}>
+            {countdown}
+          </div>
+        </div>
+      )}
 
       <GameHUD
         hearts={gameState.hearts}
